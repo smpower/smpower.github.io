@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="baidu-site-verification" content="code-RZUMNa1Yyo">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/smpower/smpower.github.io/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css" integrity="sha256-2H3fkXt6FEmrReK448mDVGKb3WW2ZZw35gI7vqHOE4Y=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.css" integrity="sha256-no0c5ccDODBwp+9hSmV5VvPpKwHCpbVzXHexIkupM6U=" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.js" integrity="sha256-a5YRB27CcBwBFcT5EF/f3E4vzIqyHrSR878nseNYw64=" crossorigin="anonymous"></script>
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"hi-ruofei.com","root":"/","images":"https://cdn.jsdelivr.net/gh/smpower/smpower.github.io/images","scheme":"Gemini","version":"8.6.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"width":270},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":true}}</script><script src="https://cdn.jsdelivr.net/gh/smpower/smpower.github.io/js/config.js"></script>
+<meta name="description" content="目标 使用 gitolite 搭建本地 git 服务 通过 iCloud 同步仓库  准备 ssh key使用 ssh-keygen 命令生成 ssh key：">
+<meta property="og:type" content="article">
+<meta property="og:title" content="在 Mac 上使用 gitolite 搭建 Git 服务器">
+<meta property="og:url" content="https://hi-ruofei.com/post/952aa112/index.html">
+<meta property="og:site_name" content="若非的日志">
+<meta property="og:description" content="目标 使用 gitolite 搭建本地 git 服务 通过 iCloud 同步仓库  准备 ssh key使用 ssh-keygen 命令生成 ssh key：">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/smpower/oss/raw/master/hi-ruofei.com/knM4zu.png">
+<meta property="og:image" content="https://gitee.com/smpower/oss/raw/master/hi-ruofei.com/fozuqm.png">
+<meta property="og:image" content="https://gitee.com/smpower/oss/raw/master/hi-ruofei.com/8gIbvw.jpg">
+<meta property="og:image" content="https://gitee.com/smpower/oss/raw/master/hi-ruofei.com/2xkXB3.png">
+<meta property="og:image" content="https://gitee.com/smpower/oss/raw/master/hi-ruofei.com/fHnR56.png">
+<meta property="og:image" content="https://gitee.com/smpower/oss/raw/master/hi-ruofei.com/ZEeaGy.png">
+<meta property="og:image" content="https://gitee.com/smpower/oss/raw/master/hi-ruofei.com/x51QfE.png">
+<meta property="og:image" content="https://gitee.com/smpower/oss/raw/master/hi-ruofei.com/vY8mFa.png">
+<meta property="article:published_time" content="2021-03-26T18:21:48.000Z">
+<meta property="article:modified_time" content="2021-05-26T00:00:00.000Z">
+<meta property="article:author" content="若非">
+<meta property="article:tag" content="gitolite">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/smpower/oss/raw/master/hi-ruofei.com/knM4zu.png">
+
+
+<link rel="canonical" href="https://hi-ruofei.com/post/952aa112/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://hi-ruofei.com/post/952aa112/","path":"post/952aa112/","title":"在 Mac 上使用 gitolite 搭建 Git 服务器"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>在 Mac 上使用 gitolite 搭建 Git 服务器 | 若非的日志</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-156423980-1"></script>
+  <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"UA-156423980-1","only_pageview":false}</script>
+  <script src="https://cdn.jsdelivr.net/gh/smpower/smpower.github.io/js/third-party/analytics/google-analytics.js"></script>
+
+
+
+
+  <meta name="keywords" content="git,gitolite,git 裸仓库,iCloud,MacOS,MacBook,SSH,MacBook 远程登录,若非的日志,若非的博客,若非的日记,技术笔记,技术博客,空间周边,Web开发,前端开发,TypeScript,React,Webpack,博客">
+
+
+<meta name="baidu_union_verify" content="68e4f384879dc561674a548accc6b847"/>
+<meta name="yandex-verification" content="9788e2b0ed6f343a"/>
+<meta name="360-site-verification" content="d273f6027f001901c40e07e6e117253a"/>
+<script>
+  (function () {
+    const redirect = () => {
+      const hosts = ["hi-ruofei.netlify.app", "smpower.github.io", "master--hi-ruofei.netlify.app"];
+      const {host, pathname} = window.location;
+      hosts.forEach(hostItem => {
+        if (hostItem === host) 
+          window.location = `https://hi-ruofei.com${pathname}`;
+        }
+      );
+    }
+    redirect();
+  })();
+</script>
+<script data-ad-client="ca-pub-6487844781006261" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script type="text/javascript">
+  var _hmt = _hmt || [];
+  (function () {
+    var hostname = window.location.hostname;
+    if (hostname === 'localhost') {
+      return;
+    }
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?401eeb63559fc8c7d4a5c7b991727ba5";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+  })();
+</script>
+
+  <noscript>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/smpower/smpower.github.io/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="若非的日志" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">若非的日志</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">爱编码 - 爱生活 - 爱分享</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+        <li class="menu-item menu-item-feedback"><a href="/feedback/" rel="section"><i class="fa fa-comment fa-fw"></i>留言反馈</a></li>
+        <li class="menu-item menu-item-update-log"><a href="/update-log/" rel="section"><i class="fa fa-clock fa-fw"></i>更新日志</a></li>
+        <li class="menu-item menu-item-links"><a href="/links/" rel="section"><i class="fa fa-globe fa-fw"></i>友情链接</a></li>
+        <li class="menu-item menu-item-sitemap"><a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%9B%AE%E6%A0%87"><span class="nav-number">1.</span> <span class="nav-text">目标</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%87%86%E5%A4%87-ssh-key"><span class="nav-number">2.</span> <span class="nav-text">准备 ssh key</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%81%E8%AE%B8%E8%BF%9C%E7%A8%8B%E7%99%BB%E5%BD%95-MacBook"><span class="nav-number">3.</span> <span class="nav-text">允许远程登录 MacBook</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8-iCloud-%E5%90%8C%E6%AD%A5%E8%A3%B8%E4%BB%93%E5%BA%93"><span class="nav-number">4.</span> <span class="nav-text">使用 iCloud 同步裸仓库</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85%E3%80%81%E9%85%8D%E7%BD%AE-gitolite"><span class="nav-number">5.</span> <span class="nav-text">安装、配置 gitolite</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A4%BA%E4%BE%8B"><span class="nav-number">6.</span> <span class="nav-text">示例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">7.</span> <span class="nav-text">参考</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-overview">
+            <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="若非"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">若非</p>
+  <div class="site-description" itemprop="description">爱编码，爱生活，爱分享。</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">29</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">25</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/smpower" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;smpower" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:rf.wangchn@foxmail.com" title="E-Mail → mailto:rf.wangchn@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/atom.xml" title="RSS → &#x2F;atom.xml"><i class="fa fa-rss fa-fw"></i>RSS</a>
+      </span>
+  </div>
+  <div class="cc-license site-overview-item animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdn.jsdelivr.net/npm/@creativecommons/vocabulary@2020.11.3/assets/license_badges/small/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://hi-ruofei.com/post/952aa112/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="若非">
+      <meta itemprop="description" content="爱编码，爱生活，爱分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="若非的日志">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          在 Mac 上使用 gitolite 搭建 Git 服务器
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-03-26 18:21:48" itemprop="dateCreated datePublished" datetime="2021-03-26T18:21:48+00:00">2021-03-26</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-05-26 00:00:00" itemprop="dateModified" datetime="2021-05-26T00:00:00+00:00">2021-05-26</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Git/" itemprop="url" rel="index"><span itemprop="name">Git</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h2 id="目标"><a href="#目标" class="headerlink" title="目标"></a>目标</h2><ul>
+<li>使用 gitolite 搭建本地 git 服务</li>
+<li>通过 iCloud 同步仓库</li>
+</ul>
+<h2 id="准备-ssh-key"><a href="#准备-ssh-key" class="headerlink" title="准备 ssh key"></a>准备 ssh key</h2><p>使用 <code>ssh-keygen</code> 命令生成 ssh key：</p>
+<span id="more"></span>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">$ ssh-keygen -t rsa -b 4096</span><br><span class="line">Generating public/private rsa key pair.</span><br><span class="line">Enter file <span class="keyword">in</span> <span class="built_in">which</span> to save the key (/Users/&lt;username&gt;/.ssh/id_rsa):</span><br><span class="line">Created directory <span class="string">&#x27;/Users/ruofei/.ssh&#x27;</span>.</span><br><span class="line">Enter passphrase (empty <span class="keyword">for</span> no passphrase):</span><br><span class="line">Enter same passphrase again:</span><br><span class="line">Your identification has been saved <span class="keyword">in</span> /Users/&lt;username&gt;/.ssh/id_rsa.</span><br><span class="line">Your public key has been saved <span class="keyword">in</span> /Users/&lt;username&gt;/.ssh/id_rsa.pub.</span><br><span class="line">The key fingerprint is:</span><br><span class="line">SHA256:Q80nJRy3c+QEW8Sr1...j63sm3mXw &lt;username&gt;@mbp.local</span><br><span class="line">The key<span class="string">&#x27;s randomart image is:</span></span><br><span class="line"><span class="string">+---[RSA 4096]----+</span></span><br><span class="line"><span class="string">|     ..o .o.+=B+.|</span></span><br><span class="line"><span class="string">|     .. oo.+ B+ o|</span></span><br><span class="line"><span class="string">|.    ..  ..      |</span></span><br><span class="line"><span class="string">+----[SHA256]-----+</span></span><br></pre></td></tr></table></figure>
+
+<p>默认会在 <code>/Users/&lt;username&gt;/.ssh/</code> 目录下随机生成 ssh key，建议输入一个密码。</p>
+<h2 id="允许远程登录-MacBook"><a href="#允许远程登录-MacBook" class="headerlink" title="允许远程登录 MacBook"></a>允许远程登录 MacBook</h2><p>打开 <code>系统偏好设置</code> -&gt; <code>共享</code>，勾选 <code>远程登录</code>：</p>
+<p><img src="https://gitee.com/smpower/oss/raw/master/hi-ruofei.com/knM4zu.png" alt="远程登录"></p>
+<h2 id="使用-iCloud-同步裸仓库"><a href="#使用-iCloud-同步裸仓库" class="headerlink" title="使用 iCloud 同步裸仓库"></a>使用 iCloud 同步裸仓库</h2><p>因 gitolite 服务器部署在本地，所以当我们重装系统时，一般会将 gitolite 服务的裸仓库都做一次备份。方便起见，这里使用 iCloud 同步我们的裸仓库。</p>
+<p>在 iCloud 中创建一个名为 <code>repositories</code> 的文件夹，打开终端，cd 到 iCloud 根目录下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ /Users/&lt;username&gt;/Library/Mobile\ Documents/com~apple~CloudDocs/</span><br></pre></td></tr></table></figure>
+
+<p>创建 <code>repositories</code> 目录的软连接到当前登录用户的家目录下的 <code>repositories</code> 目录：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo ln -s /Users/&lt;username&gt;/Library/Mobile\ Documents/com\~apple\~CloudDocs/repositories/ /Users/git/repositories</span><br></pre></td></tr></table></figure>
+
+<p>下面测试一下 iCloud 的同步功能是否正常。cd 到 <code>/Users/git/repositories</code> 目录下，创建一个名为 <code>test</code> 的测试文件：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">cd</span> /Users/&lt;username&gt;/repositories &amp;&amp; touch <span class="built_in">test</span></span><br></pre></td></tr></table></figure>
+
+<p>接下来，打开 iCloud 中的 <code>repositories</code> 文件夹，如果能看到我们刚才创建的这个 <code>test</code> 文件，就说明 iCloud 的同步功能是正常的。</p>
+<div class="tabs" id="测试-icloud-同步功能是否正常"><ul class="nav-tabs"><li class="tab active"><a href="#测试-icloud-同步功能是否正常-1">/Users/git/repositories/ 目录下的内容</a></li><li class="tab"><a href="#测试-icloud-同步功能是否正常-2">iCloud 中 repositories 目录下的内容</a></li></ul><div class="tab-content"><div class="tab-pane active" id="测试-icloud-同步功能是否正常-1"><p><img src="https://gitee.com/smpower/oss/raw/master/hi-ruofei.com/fozuqm.png"></p></div><div class="tab-pane" id="测试-icloud-同步功能是否正常-2"><p><img src="https://gitee.com/smpower/oss/raw/master/hi-ruofei.com/8gIbvw.jpg"></p></div></div></div>
+
+<h2 id="安装、配置-gitolite"><a href="#安装、配置-gitolite" class="headerlink" title="安装、配置 gitolite"></a>安装、配置 gitolite</h2><p>首先，克隆 gitolite 的源码：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ git <span class="built_in">clone</span> https://github.com/sitaramc/gitolite</span><br><span class="line"><span class="comment"># 如果克隆 github 上的仓库失败，可以通过国内镜像仓库克隆，速度快很多</span></span><br><span class="line"><span class="comment"># git clone https://gitee.com/mirrors/gitolite.git</span></span><br></pre></td></tr></table></figure>
+
+<p>克隆源码后建立 gitolite 软连接：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ mkdir -p ~/bin</span><br><span class="line">$ gitolite/install -ln /Users/&lt;username&gt;/bin <span class="comment"># 需使用绝对路径</span></span><br></pre></td></tr></table></figure>
+
+<p>再将 <code>gitolite</code> 追加到 <code>.bash_profile</code> 中：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">export</span> PATH=/Users/&lt;username&gt;/bin:<span class="variable">$PATH</span> <span class="comment"># 如果用 zsh 那就将这句话添加到 .bashrc 文件，注意将 &lt;username&gt; 替换成你的用户名</span></span><br></pre></td></tr></table></figure>
+
+<p>最后设置管理员用户共钥：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ gitolite setup -pk YourName.pub <span class="comment"># 这里的 YourName.pub 就是之前生成的共钥（ssh key），通常叫做 id_rsa.pub</span></span><br></pre></td></tr></table></figure>
+
+<p>上面的命令执行成功之后，会在 iCloud 的 <code>repositories</code> 目录下创建两个仓库：</p>
+<ul>
+<li><code>gitolite-admin.git</code>：这是管理员仓库，添加人员、权限等操作需要将这个仓库克隆下来在其冲的 config 中配置。</li>
+<li><code>testing.git</code>：这个是一个测试仓库。</li>
+</ul>
+<p><img src="https://gitee.com/smpower/oss/raw/master/hi-ruofei.com/2xkXB3.png" alt="初始化的两个仓库"></p>
+<p>之后我们提交的代码都会同步到 iCloud。</p>
+<p>因为我们是在本地搭建的 gitolite，所以还要在当前管理员用户的 <code>.ssh</code> 目录下创建一个配置文件 config：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ vim ~/.ssh/config</span><br></pre></td></tr></table></figure>
+
+<p>config 文件中填写：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Host <span class="built_in">local</span> <span class="comment"># local 就表示本机（127.0.0.1）</span></span><br><span class="line">    HostName 127.0.0.1</span><br><span class="line">    IdentityFile ~/.ssh/id_rsa</span><br></pre></td></tr></table></figure>
+
+<h2 id="示例"><a href="#示例" class="headerlink" title="示例"></a>示例</h2><p>将 <code>gitolite-admin.git</code> 仓库克隆下来：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> &lt;username&gt;@<span class="built_in">local</span>:gitolite-admin.git <span class="comment"># &lt;username&gt; 是你的用户名</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/smpower/oss/raw/master/hi-ruofei.com/fHnR56.png" alt="克隆 gitolite-adming.git 仓库"></p>
+<p>用编辑器打开 <code>gitolite-admin</code> 仓库，修改其中的 <code>gitolite.conf</code> 文件：</p>
+<p><img src="https://gitee.com/smpower/oss/raw/master/hi-ruofei.com/ZEeaGy.png" alt="修改 gitolite.conf 文件"></p>
+<p>图中新加的名为 <code>hi-ruofei.com</code> 仓库名就是本站的源码仓库。</p>
+<p>修改之后，提交到 gitolite，gitolite 会自动帮我们创建一个名为 <code>hi-ruofei.com</code> 的裸仓库，该仓库会同步到 iCloud 上。</p>
+<p><img src="https://gitee.com/smpower/oss/raw/master/hi-ruofei.com/x51QfE.png" alt="自动创建 hi-ruofei.com 裸仓库"></p>
+<p><img src="https://gitee.com/smpower/oss/raw/master/hi-ruofei.com/vY8mFa.png" alt="保存在 iCloud 上的裸仓库"></p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://gitolite.com/">Gitolite</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/a464057216/article/details/52644021">45.在 Mac 上使用 gitolite 搭建 Git 服务器</a></li>
+</ul>
+<div class="post-ggad"><script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script><ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-6487844781006261" data-ad-slot="3432081921"></ins><script>(adsbygoogle = window.adsbygoogle || []).push({});</script></div>
+    </div>
+
+    
+    
+    
+      
+
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>若非
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://hi-ruofei.com/post/952aa112/" title="在 Mac 上使用 gitolite 搭建 Git 服务器">https://hi-ruofei.com/post/952aa112/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="followme">
+  <span>欢迎关注我的其它发布渠道</span>
+
+  <div class="social-list">
+
+      <div class="social-item">
+        <a target="_blank" class="social-link" href="/images/wechat_channel.jpg">
+          <span class="icon">
+            <i class="fab fa-weixin"></i>
+          </span>
+
+          <span class="label">WeChat</span>
+        </a>
+      </div>
+
+      <div class="social-item">
+        <a target="_blank" class="social-link" href="/atom.xml">
+          <span class="icon">
+            <i class="fa fa-rss"></i>
+          </span>
+
+          <span class="label">RSS</span>
+        </a>
+      </div>
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/gitolite/" rel="tag"># gitolite</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/post/834f359e/" rel="prev" title="JavaScript 之检测数组">
+                  <i class="fa fa-chevron-left"></i> JavaScript 之检测数组
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/post/a90b7ddb/" rel="next" title="记一次博客优化">
+                  记一次博客优化 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments utterances-container"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank"><a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">鲁ICP备19026031号-2</a> </a>
+  </div>
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">若非</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div><div style="margin-top: 15px;">
+  <script async="async" src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+  <ins
+    class="adsbygoogle"
+    style="display:block; text-align:center;"
+    data-ad-layout="in-article"
+    data-ad-format="fluid"
+    data-ad-client="ca-pub-6487844781006261"
+    data-ad-slot="3432081921"></ins>
+  <script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+  </script>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/gh/smpower/smpower.github.io/js/comments.js"></script><script src="https://cdn.jsdelivr.net/gh/smpower/smpower.github.io/js/utils.js"></script><script src="https://cdn.jsdelivr.net/gh/smpower/smpower.github.io/js/next-boot.js"></script>
+
+  
+<script src="https://cdn.jsdelivr.net/gh/smpower/smpower.github.io/js/third-party/search/local-search.js"></script>
+
+
+
+  <script class="next-config" data-name="nprogress" type="application/json">{"enable":true,"spinner":true}</script>
+  <script src="https://cdn.jsdelivr.net/gh/smpower/smpower.github.io/js/third-party/nprogress.js"></script>
+
+  
+
+
+
+
+  <script src="https://cdn.jsdelivr.net/npm/quicklink@2.2.0/dist/quicklink.umd.js" integrity="sha256-4kQf9z5ntdQrzsBC3YSHnEz02Z9C1UeW/E9OgnvlzSY=" crossorigin="anonymous"></script>
+  <script class="next-config" data-name="quicklink" type="application/json">{"enable":true,"home":false,"archive":false,"delay":true,"timeout":3000,"priority":true,"ignores":null,"url":"https://hi-ruofei.com/post/952aa112/"}</script>
+  <script src="https://cdn.jsdelivr.net/gh/smpower/smpower.github.io/js/third-party/quicklink.js"></script>
+<script class="next-config" data-name="utterances" type="application/json">{"enable":true,"repo":"smpower/smpower.github.io","issue_term":"pathname","theme":"preferred-color-scheme"}</script>
+<script src="https://cdn.jsdelivr.net/gh/smpower/smpower.github.io/js/third-party/comments/utterances.js"></script>
+
+</body>
+</html>
